@@ -1,0 +1,86 @@
+/**
+ * FINAL CLIENT-SIDE JAVASCRIPT (FRONT-END)
+ *
+ * This code communicates with the secure backend server (server.js).
+ * It does NOT contain the secret API key.
+ */
+
+// --- [1] DOM Elements ---
+const chatWindow = document.getElementById('chat-window');
+const messageForm = document.getElementById('message-form');
+const messageInput = document.getElementById('message-input');
+const typingIndicator = document.getElementById('typing-indicator');
+
+// --- [2] Event Listener for Form Submission ---
+messageForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); // Prevent page from reloading
+    const userMessage = messageInput.value.trim();
+    if (!userMessage) return; // Don't do anything if the message is empty
+
+    addMessageToUI(userMessage, 'user-message');
+    messageInput.value = ''; // Clear the input field
+
+    // Show the typing indicator while we wait for the response
+    typingIndicator.classList.remove('hidden');
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+
+    try {
+        // Call our new function that talks to our backend server
+        await callBackendAPI(userMessage);
+    } catch (error) {
+        console.error("Error communicating with backend:", error);
+        addMessageToUI("Sorry, could not connect to the server. Please ensure it's running and check the console.", 'ai-message');
+    } finally {
+        // Hide the typing indicator once done
+        typingIndicator.classList.add('hidden');
+    }
+});
+
+// --- [3] Function to Add a New Message to the Chat Window ---
+function addMessageToUI(message, className) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${className}`;
+
+    const messageParagraph = document.createElement('p');
+    messageParagraph.textContent = message;
+    messageDiv.appendChild(messageParagraph);
+
+    chatWindow.appendChild(messageDiv);
+    chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to the latest message
+
+    return messageParagraph; // Return the paragraph element for streaming
+}
+
+// --- [4] Function to Call Our Backend Server API ---
+async function callBackendAPI(prompt) {
+    // The URL now points to our local server's /chat endpoint
+    const API_URL = 'http://localhost:3000/chat';
+
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // Send the prompt in the correct JSON format for our server
+        body: JSON.stringify({ prompt: prompt })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Backend request failed with status ${response.status}`);
+    }
+
+    // Create an empty AI message bubble to stream the response into
+    const aiMessageP = addMessageToUI('', 'ai-message');
+    aiMessageP.textContent = ' '; // Add a space to ensure the bubble renders immediately
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    // Read the simple text stream coming from our server
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunkText = decoder.decode(value);
+        aiMessageP.textContent += chunkText; // Append the text directly
+        chatWindow.scrollTop = chatWindow.scrollHeight; // Keep scrolling as text arrives
+    }
+}

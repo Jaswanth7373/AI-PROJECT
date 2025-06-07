@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time AI Assistant</title>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="chat-container">
+        <!-- The header of the chat interface -->
+        <header id="chat-header">
+            <h1>AI Assistant</h1>
+            <p>Powered by JASWANTH</p>
+        </header>
+
+        <!-- Messages will be dynamically added here by script.js -->
+        <div id="chat-window">
+            <div class="message ai-message">
+                <p>Hello! How can I help you today?</p>
+            </div>
+        </div>
+
+        <!-- The typing indicator, hidden by default -->
+        <div id="typing-indicator" class="hidden">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <!-- The form for user input -->
+        <form id="message-form">
+            <input type="text" id="message-input" placeholder="Ask me anything..." autocomplete="off" required>
+            <button type="submit" id="send-button" aria-label="Send Message">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- Link to the external JavaScript file -->
+    <script src="script.js" defer></script>
+</body>
+</html>
